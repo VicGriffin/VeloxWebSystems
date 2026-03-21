@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+@theme {
+  --color-orange: #ff4d00;
+  --color-orange-dark: #e64500;
+  --color-emerald: #10b981;
+  --color-emerald-dark: #059669;
+  --color-dark-bg: #0a0a0a;
+  --color-dark-surface: #141414;
+  --color-dark-surface-2: #1a1a1a;
+  --color-dark-border: #2a2a2a;
+  --color-danger: #ef4444;
+  --color-warning: #f59e0b;
+  --color-success: #10b981;
+}
+
+:root {
+  --background: var(--color-dark-bg);
+  --foreground: #ffffff;
+  --card: var(--color-dark-surface);
+  --card-foreground: #ffffff;
+  --popover: var(--color-dark-surface);
+  --popover-foreground: #ffffff;
+  --primary: var(--color-orange);
+  --primary-foreground: #ffffff;
+  --secondary: var(--color-dark-surface-2);
+  --secondary-foreground: #ffffff;
+  --muted: var(--color-dark-surface-2);
+  --muted-foreground: #a1a1a1;
+  --accent: var(--color-emerald);
+  --accent-foreground: #ffffff;
+  --destructive: var(--color-danger);
+  --destructive-foreground: #ffffff;
+  --border: var(--color-dark-border);
+  --input: var(--color-dark-border);
+  --ring: var(--color-orange);
+  --radius: 0.5rem;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
