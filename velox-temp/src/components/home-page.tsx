@@ -29,7 +29,7 @@ export function HomePage({ onStartAudit }: HomePageProps) {
     {
       icon: TrendingUp,
       title: 'Revenue Impact',
-      description: 'Understand exactly how much revenue you're losing and what you can gain',
+      description: "Understand exactly how much revenue you're losing and what you can gain",
       color: 'text-emerald-400',
       bg: 'bg-emerald-500/20',
     },
