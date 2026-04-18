@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { motion, type Variants } from "framer-motion";
-import { ArrowRight, Sparkles, Zap, Target, TrendingUp } from "lucide-react";
+import { ArrowRight, Sparkles, Zap, Target } from "lucide-react";
 
 export function HeroSection() {
   const containerVariants: Variants = {

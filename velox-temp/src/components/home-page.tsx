@@ -1,9 +1,7 @@
-'use client'
-
 import { motion } from 'framer-motion'
 import {
-  Zap, TrendingUp, Target, Shield, BarChart3, Eye, ArrowRight,
-  CheckCircle2, Users, Lightbulb, Rocket
+  Zap, TrendingUp, Target, Shield, ArrowRight,
+  CheckCircle2, Rocket
 } from 'lucide-react'
 
 interface HomePageProps {
@@ -279,29 +277,32 @@ export function HomePage({ onStartAudit }: HomePageProps) {
             >
               <div className="bg-[var(--color-bg-secondary)] border-2 border-[var(--color-border)] rounded-2xl p-8">
                 <div className="space-y-6">
-                  {['Technical', 'SEO', 'UX', 'Conversion'].map((category, i) => (
-                    <motion.div
-                      key={category}
-                      initial={{ opacity: 0, y: 20 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.3 + i * 0.1 }}
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="font-semibold">{category}</span>
-                        <span className="text-emerald-400 font-bold">
-                          {Math.round(50 + Math.random() * 50)}/100
-                        </span>
-                      </div>
-                      <div className="h-2 bg-[var(--color-bg-tertiary)] rounded-full overflow-hidden">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          whileInView={{ width: `${Math.round(50 + Math.random() * 50)}%` }}
-                          transition={{ delay: 0.5 + i * 0.1, duration: 0.8 }}
-                          className="h-full bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-accent)]"
-                        />
-                      </div>
-                    </motion.div>
-                  ))}
+                  {['Technical', 'SEO', 'UX', 'Conversion'].map((category, i) => {
+                    const score = 50 + Math.floor(Math.random() * 50)
+                    return (
+                      <motion.div
+                        key={category}
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3 + i * 0.1 }}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-semibold">{category}</span>
+                          <span className="text-emerald-400 font-bold">
+                            {score}/100
+                          </span>
+                        </div>
+                        <div className="h-2 bg-[var(--color-bg-tertiary)] rounded-full overflow-hidden">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            whileInView={{ width: `${score}%` }}
+                            transition={{ delay: 0.5 + i * 0.1, duration: 0.8 }}
+                            className="h-full bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-accent)]"
+                          />
+                        </div>
+                      </motion.div>
+                    )
+                  })}
                 </div>
               </div>
             </motion.div>

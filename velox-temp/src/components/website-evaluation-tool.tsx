@@ -1,12 +1,7 @@
-'use client'
-
 import { useState, useEffect } from 'react'
 import { motion, type Variants } from 'framer-motion'
 import {
-  Search, Zap, Globe, FileText, Users, TrendingUp,
-  BarChart3, Lock, Unlock, AlertTriangle, CheckCircle2,
-  XCircle, ChevronRight, Loader2, Eye, Target,
-  Activity, Shield, MessageSquare, Download, Share2, ArrowLeft
+  Zap, Globe, Lock, Unlock, Loader2, Target, MessageSquare, ArrowLeft
 } from 'lucide-react'
 import { analyzeWebsiteRealTime, type WebsiteAnalysisResult } from '@/lib/api-client'
 import { RecommendationCard } from './recommendation-card'
@@ -275,7 +270,7 @@ export function WebsiteEvaluationTool() {
 
               {/* Stage Indicators */}
               <div className="flex justify-center gap-2">
-                {['validating', 'crawling', 'analyzing', 'calculating'].map((s, i) => (
+                {['validating', 'crawling', 'analyzing', 'calculating'].map((s) => (
                   <motion.div
                     key={s}
                     animate={{

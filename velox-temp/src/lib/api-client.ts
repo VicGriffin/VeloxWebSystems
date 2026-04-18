@@ -3,6 +3,8 @@
  * Fetches live metrics from multiple sources
  */
 
+import { API_CONFIG, METRIC_THRESHOLDS, REVENUE_CONFIG } from '@/constants'
+
 export interface TechnicalMetrics {
   pageSpeed: number
   ttfb: number
@@ -105,6 +107,7 @@ function generateMetricsFromUrl(url: string): number {
 export async function analyzeWebsiteRealTime(url: string): Promise<WebsiteAnalysisResult> {
   return new Promise((resolve) => {
     // Simulate API call delay for realistic UX
+    const delay = API_CONFIG.SIMULATED_DELAY + Math.random() * API_CONFIG.SIMULATED_DELAY_VARIANCE
     setTimeout(() => {
       const baseMetric = generateMetricsFromUrl(url)
       const timestamp = Date.now()
@@ -188,17 +191,20 @@ export async function analyzeWebsiteRealTime(url: string): Promise<WebsiteAnalys
       const rvs = Math.round(technicalScore + seoScore + uxScore + conversionScore + analyticsScore + authorityScore)
 
       const status: 'critical' | 'weak' | 'functional' | 'optimized' = 
-        rvs < 25 ? 'critical' : rvs < 50 ? 'weak' : rvs < 75 ? 'functional' : 'optimized'
+        rvs < METRIC_THRESHOLDS.CRITICAL_THRESHOLD ? 'critical' 
+        : rvs < METRIC_THRESHOLDS.WEAK_THRESHOLD ? 'weak' 
+        : rvs < METRIC_THRESHOLDS.FUNCTIONAL_THRESHOLD ? 'functional' 
+        : 'optimized'
 
       // Estimate traffic and calculate losses
-      const trafficEstimate = [500, 1200, 3500, 8000, 15000, 35000, 75000, 150000][Math.abs(Math.floor(rvs / 10))]
-      const monthlyLoss = Math.round(trafficEstimate * 0.03 * (100 - rvs) * 0.12)
-      const annualLoss = monthlyLoss * 12
+      const trafficIndex = Math.min(Math.abs(Math.floor(rvs / 10)), REVENUE_CONFIG.TRAFFIC_TIERS.length - 1)
+      const trafficEstimate = REVENUE_CONFIG.TRAFFIC_TIERS[trafficIndex]
+      const monthlyLoss = Math.round(trafficEstimate * REVENUE_CONFIG.CONVERSION_RATE * (100 - rvs) * REVENUE_CONFIG.MONTHLY_VALUE_PER_CONVERSION)
+      const annualLoss = monthlyLoss * REVENUE_CONFIG.MONTHLY_TO_ANNUAL_MULTIPLIER
 
       // Generate recommendations
       const recommendations = generateRecommendations(
-        { technical, seo, ux, conversion, analytics, authority },
-        rvs
+        { technical, seo, ux, conversion, analytics, authority }
       )
 
       resolve({
@@ -216,7 +222,7 @@ export async function analyzeWebsiteRealTime(url: string): Promise<WebsiteAnalys
         authority,
         recommendations,
       })
-    }, 3500 + Math.random() * 1500) // Realistic API delay
+    }, delay)
   })
 }
 
@@ -228,14 +234,13 @@ function generateRecommendations(
     conversion: ConversionMetrics
     analytics: AnalyticsMetrics
     authority: AuthorityMetrics
-  },
-  rvs: number
+  }
 ): Recommendation[] {
   const recommendations: Recommendation[] = []
   let id = 1
 
   // Technical recommendations
-  if (metrics.technical.pageSpeed < 50) {
+  if (metrics.technical.pageSpeed < METRIC_THRESHOLDS.PAGE_SPEED_CRITICAL) {
     recommendations.push({
       id: `rec-${id++}`,
       category: 'Technical',
@@ -263,7 +268,7 @@ function generateRecommendations(
     })
   }
 
-  if (metrics.technical.imageOptimization < 60) {
+  if (metrics.technical.imageOptimization < METRIC_THRESHOLDS.IMAGE_OPTIMIZATION_CRITICAL) {
     recommendations.push({
       id: `rec-${id++}`,
       category: 'Technical',
@@ -290,7 +295,7 @@ function generateRecommendations(
   }
 
   // SEO recommendations
-  if (metrics.seo.structuredData < 60) {
+  if (metrics.seo.structuredData < METRIC_THRESHOLDS.STRUCTURED_DATA_CRITICAL) {
     recommendations.push({
       id: `rec-${id++}`,
       category: 'SEO',
@@ -318,7 +323,7 @@ function generateRecommendations(
   }
 
   // UX recommendations
-  if (metrics.ux.mobileResponsive < 70) {
+  if (metrics.ux.mobileResponsive < METRIC_THRESHOLDS.MOBILE_RESPONSIVE_CRITICAL) {
     recommendations.push({
       id: `rec-${id++}`,
       category: 'UX',
@@ -345,7 +350,7 @@ function generateRecommendations(
   }
 
   // Conversion recommendations
-  if (metrics.conversion.trustSignals < 60) {
+  if (metrics.conversion.trustSignals < METRIC_THRESHOLDS.TRUST_SIGNALS_CRITICAL) {
     recommendations.push({
       id: `rec-${id++}`,
       category: 'Conversion',
@@ -374,7 +379,7 @@ function generateRecommendations(
   }
 
   // Analytics recommendations
-  if (metrics.analytics.conversionTracking < 50) {
+  if (metrics.analytics.conversionTracking < METRIC_THRESHOLDS.CONVERSION_TRACKING_CRITICAL) {
     recommendations.push({
       id: `rec-${id++}`,
       category: 'Analytics',
@@ -402,7 +407,7 @@ function generateRecommendations(
   }
 
   // Authority recommendations
-  if (metrics.authority.backlinkProfile < 50) {
+  if (metrics.authority.backlinkProfile < METRIC_THRESHOLDS.BACKLINK_PROFILE_CRITICAL) {
     recommendations.push({
       id: `rec-${id++}`,
       category: 'Authority',
@@ -438,5 +443,5 @@ function generateRecommendations(
     return aUrgency - bUrgency || b.impact - a.impact
   })
 
-  return recommendations.slice(0, 8)
+  return recommendations.slice(0, 8) // Max 8 recommendations to display
 }

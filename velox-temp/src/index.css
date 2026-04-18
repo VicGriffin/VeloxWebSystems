@@ -95,3 +95,13 @@ html {
     background: var(--color-text-secondary);
   }
 }
+
+/* Gradient Text Utility */
+.text-gradient {
+  @apply bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-accent)] bg-clip-text text-transparent;
+}
+
+/* Utility classes for modern component styling */
+.glass-effect {
+  @apply backdrop-blur-md bg-white/10;
+}
