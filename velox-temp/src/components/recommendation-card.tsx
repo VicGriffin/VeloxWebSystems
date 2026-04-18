@@ -1,6 +1,6 @@
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronRight, Zap, AlertTriangle, TrendingUp, Clock, Target, ExternalLink } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import type { Recommendation } from '@/lib/api-client'
 
 interface RecommendationCardProps {
@@ -8,32 +8,21 @@ interface RecommendationCardProps {
   index: number
 }
 
+const urgencyColors = {
+  critical: { bg: 'bg-red-500/20', border: 'border-red-500/50', text: 'text-red-400' },
+  high: { bg: 'bg-orange-500/20', border: 'border-orange-500/50', text: 'text-orange-400' },
+  medium: { bg: 'bg-yellow-500/20', border: 'border-yellow-500/50', text: 'text-yellow-400' },
+  low: { bg: 'bg-blue-500/20', border: 'border-blue-500/50', text: 'text-blue-400' },
+} as const
+
 export function RecommendationCard({ recommendation, index }: RecommendationCardProps) {
   const [isExpanded, setIsExpanded] = useState(false)
 
-  const urgencyColors = {
-    critical: { bg: 'bg-red-500/20', border: 'border-red-500/50', text: 'text-red-400' },
-    high: { bg: 'bg-orange-500/20', border: 'border-orange-500/50', text: 'text-orange-400' },
-    medium: { bg: 'bg-yellow-500/20', border: 'border-yellow-500/50', text: 'text-yellow-400' },
-    low: { bg: 'bg-blue-500/20', border: 'border-blue-500/50', text: 'text-blue-400' },
-  }
-
   const colors = urgencyColors[recommendation.urgency]
 
-  const effortLabels = {
-    0: '< 5 hrs',
-    25: '5-10 hrs',
-    50: '10-20 hrs',
-    75: '20-40 hrs',
-    100: '40+ hrs',
-  }
-
-  const getEffortLabel = (effort: number): string => {
-    if (effort < 25) return '< 5 hrs'
-    if (effort < 50) return '5-10 hrs'
-    if (effort < 75) return '10-20 hrs'
-    return '20+ hrs'
-  }
+  const toggleExpanded = useCallback(() => {
+    setIsExpanded(prev => !prev)
+  }, [])
 
   return (
     <motion.div
@@ -41,7 +30,16 @@ export function RecommendationCard({ recommendation, index }: RecommendationCard
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1 }}
       className={`${colors.bg} border-2 ${colors.border} rounded-xl p-6 hover:shadow-lg transition-all cursor-pointer group`}
-      onClick={() => setIsExpanded(!isExpanded)}
+      onClick={toggleExpanded}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          toggleExpanded()
+        }
+      }}
+      aria-expanded={isExpanded}
     >
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
@@ -108,13 +106,15 @@ export function RecommendationCard({ recommendation, index }: RecommendationCard
       </div>
 
       {/* Expanded Content */}
-      {isExpanded && (
-        <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: 'auto' }}
-          exit={{ opacity: 0, height: 0 }}
-          className="border-t border-white/10 pt-4 space-y-4"
-        >
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2 }}
+            className="border-t border-white/10 pt-4 space-y-4 overflow-hidden"
+          >
           {/* Implementation Steps */}
           <div>
             <h4 className="font-semibold text-white mb-3 flex items-center gap-2">
@@ -164,7 +164,8 @@ export function RecommendationCard({ recommendation, index }: RecommendationCard
             View Implementation Guide
           </button>
         </motion.div>
-      )}
+        )}
+      </AnimatePresence>
     </motion.div>
   )
 }

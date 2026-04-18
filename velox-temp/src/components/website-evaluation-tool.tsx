@@ -1,16 +1,16 @@
-'use client'
-
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion, type Variants } from 'framer-motion'
 import {
-  Search, Zap, Globe, FileText, Users, TrendingUp,
-  BarChart3, Lock, Unlock, AlertTriangle, CheckCircle2,
-  XCircle, ChevronRight, Loader2, Eye, Target,
-  Activity, Shield, MessageSquare, Download, Share2, ArrowLeft
+  Zap, Globe, Lock, Unlock, Loader2, Target,
+  MessageSquare, ArrowLeft
 } from 'lucide-react'
 import { analyzeWebsiteRealTime, type WebsiteAnalysisResult } from '@/lib/api-client'
 import { RecommendationCard } from './recommendation-card'
 import { ResultsDashboard } from './results-dashboard'
+
+interface WebsiteEvaluationToolProps {
+  onBack?: () => void
+}
 
 type AnalysisStage = 'idle' | 'validating' | 'crawling' | 'analyzing' | 'calculating' | 'complete'
 
@@ -23,7 +23,7 @@ const stageMessages: Record<AnalysisStage, { title: string; description: string 
   complete: { title: 'Analysis Complete', description: 'Generating your comprehensive report' },
 }
 
-export function WebsiteEvaluationTool() {
+export function WebsiteEvaluationTool({ onBack }: WebsiteEvaluationToolProps) {
   const [url, setUrl] = useState('')
   const [email, setEmail] = useState('')
   const [stage, setStage] = useState<AnalysisStage>('idle')
@@ -33,14 +33,17 @@ export function WebsiteEvaluationTool() {
   const [isPremium, setIsPremium] = useState(false)
   const [emailError, setEmailError] = useState('')
 
-  const isValidUrl = (url: string) => {
+  const isValidUrl = useCallback((urlString: string): boolean => {
     try {
-      new URL(url)
-      return true
+      // Add protocol if missing
+      const urlToCheck = urlString.startsWith('http') ? urlString : `https://${urlString}`
+      const parsedUrl = new URL(urlToCheck)
+      // Ensure it has a valid hostname
+      return Boolean(parsedUrl.hostname && parsedUrl.hostname.includes('.'))
     } catch {
       return false
     }
-  }
+  }, [])
 
   // Progress simulation
   useEffect(() => {
@@ -66,9 +69,10 @@ export function WebsiteEvaluationTool() {
     return () => clearInterval(interval)
   }, [stage])
 
-  const startAnalysis = async () => {
-    if (!isValidUrl(url)) {
-      setEmailError('Please enter a valid URL (e.g., https://example.com)')
+  const startAnalysis = useCallback(async () => {
+    const trimmedUrl = url.trim()
+    if (!isValidUrl(trimmedUrl)) {
+      setEmailError('Please enter a valid URL (e.g., example.com or https://example.com)')
       return
     }
 
@@ -76,6 +80,9 @@ export function WebsiteEvaluationTool() {
     setResult(null)
     setShowEmailCapture(false)
     setIsPremium(false)
+
+    // Normalize URL
+    const normalizedUrl = trimmedUrl.startsWith('http') ? trimmedUrl : `https://${trimmedUrl}`
 
     const stages: AnalysisStage[] = ['validating', 'crawling', 'analyzing', 'calculating', 'complete']
 
@@ -86,23 +93,30 @@ export function WebsiteEvaluationTool() {
       }
     }
 
-    // Fetch real-time analysis data
-    const analysisResult = await analyzeWebsiteRealTime(url)
-    setResult(analysisResult)
-    setProgress(100)
-    setShowEmailCapture(true)
-  }
+    try {
+      // Fetch real-time analysis data
+      const analysisResult = await analyzeWebsiteRealTime(normalizedUrl)
+      setResult(analysisResult)
+      setProgress(100)
+      setShowEmailCapture(true)
+    } catch (error) {
+      console.error('Analysis failed:', error)
+      setEmailError('Analysis failed. Please try again.')
+      setStage('idle')
+    }
+  }, [url, isValidUrl])
 
-  const captureEmail = () => {
-    if (!email || !email.includes('@')) {
+  const captureEmail = useCallback(() => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!email || !emailRegex.test(email)) {
       setEmailError('Please enter a valid email address')
       return
     }
     setEmailError('')
     setIsPremium(true)
-  }
+  }, [email])
 
-  const reset = () => {
+  const reset = useCallback(() => {
     setUrl('')
     setEmail('')
     setStage('idle')
@@ -111,7 +125,7 @@ export function WebsiteEvaluationTool() {
     setShowEmailCapture(false)
     setIsPremium(false)
     setEmailError('')
-  }
+  }, [])
 
   const handleExport = () => {
     if (!result) return
@@ -165,28 +179,28 @@ export function WebsiteEvaluationTool() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[var(--color-bg-primary)] to-[var(--color-bg-secondary)] text-white">
-      {/* Header */}
-      <header className="border-b border-[var(--color-border)] bg-gradient-to-b from-[var(--color-bg-primary)] to-[var(--color-bg-secondary)] backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-accent)] rounded-lg flex items-center justify-center">
-              <Zap className="w-6 h-6 text-white" />
+      {/* Sub-header for audit page */}
+      {result && (
+        <div className="border-b border-[var(--color-border)] bg-[var(--color-bg-secondary)]/50">
+          <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-accent)] rounded-lg flex items-center justify-center">
+                <Zap className="w-4 h-4 text-white" aria-hidden="true" />
+              </div>
+              <span className="text-lg font-semibold">Audit Results</span>
             </div>
-            <span className="text-xl font-bold">Velox Audit</span>
-          </div>
-          {result && (
             <button
               onClick={reset}
-              className="px-4 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-all flex items-center gap-2"
+              className="px-4 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-all flex items-center gap-2 text-sm"
             >
-              <ArrowLeft className="w-4 h-4" />
+              <ArrowLeft className="w-4 h-4" aria-hidden="true" />
               New Audit
             </button>
-          )}
+          </div>
         </div>
-      </header>
+      )}
 
-      <main className="max-w-7xl mx-auto px-4 py-12">
+      <main className="max-w-7xl mx-auto px-4 py-12" role="main">
         <motion.div
           variants={containerVariants}
           initial="hidden"

@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
 import {
-  Download, Share2, TrendingUp, AlertCircle, CheckCircle2, Zap,
-  BarChart3, Target, Shield, Users, FileText, Search, Clock, Eye
+  Download, Share2, Zap,
+  Target, Shield, Users, Search
 } from 'lucide-react'
 import type { WebsiteAnalysisResult } from '@/lib/api-client'
 
@@ -11,7 +11,15 @@ interface ResultsDashboardProps {
   onShare?: () => void
 }
 
-export function ResultsDashboard({ result, onExport, onShare }: ResultsDashboardProps) {
+// Safe average calculation to prevent NaN
+function safeAverage(obj: Record<string, number>): number {
+  const values = Object.values(obj)
+  if (values.length === 0) return 0
+  const sum = values.reduce((a, b) => a + (Number.isFinite(b) ? b : 0), 0)
+  return Math.round(sum / values.length)
+}
+
+export function ResultsDashboard({ result, onExport, onShare }: ResultsDashboardProps): JSX.Element {
   const statusColors = {
     critical: { bg: 'bg-red-500/20', border: 'border-red-500/50', text: 'text-red-400' },
     weak: { bg: 'bg-orange-500/20', border: 'border-orange-500/50', text: 'text-orange-400' },
@@ -24,28 +32,28 @@ export function ResultsDashboard({ result, onExport, onShare }: ResultsDashboard
   const categoryMetrics = [
     {
       name: 'Technical',
-      value: Math.round(Object.values(result.technical).reduce((a, b) => a + b) / Object.keys(result.technical).length),
+      value: safeAverage(result.technical),
       icon: Zap,
       color: 'text-blue-400',
       bg: 'bg-blue-500/20',
     },
     {
       name: 'SEO',
-      value: Math.round(Object.values(result.seo).reduce((a, b) => a + b) / Object.keys(result.seo).length),
+      value: safeAverage(result.seo),
       icon: Search,
       color: 'text-purple-400',
       bg: 'bg-purple-500/20',
     },
     {
       name: 'UX',
-      value: Math.round(Object.values(result.ux).reduce((a, b) => a + b) / Object.keys(result.ux).length),
+      value: safeAverage(result.ux),
       icon: Users,
       color: 'text-pink-400',
       bg: 'bg-pink-500/20',
     },
     {
       name: 'Conversion',
-      value: Math.round(Object.values(result.conversion).reduce((a, b) => a + b) / Object.keys(result.conversion).length),
+      value: safeAverage(result.conversion),
       icon: Target,
       color: 'text-orange-400',
       bg: 'bg-orange-500/20',
@@ -68,15 +76,17 @@ export function ResultsDashboard({ result, onExport, onShare }: ResultsDashboard
           <button
             onClick={onExport}
             className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-all text-white font-medium"
+            aria-label="Export audit report as JSON"
           >
-            <Download className="w-4 h-4" />
+            <Download className="w-4 h-4" aria-hidden="true" />
             Export
           </button>
           <button
             onClick={onShare}
             className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:shadow-lg hover:shadow-blue-500/50 rounded-lg transition-all text-white font-medium"
+            aria-label="Copy shareable link to clipboard"
           >
-            <Share2 className="w-4 h-4" />
+            <Share2 className="w-4 h-4" aria-hidden="true" />
             Share
           </button>
         </div>
@@ -287,7 +297,9 @@ export function ResultsDashboard({ result, onExport, onShare }: ResultsDashboard
         >
           <p className="text-xs text-gray-500 mb-2">AVG. ROI POTENTIAL</p>
           <p className="text-3xl font-bold text-emerald-400">
-            ${Math.round(result.recommendations.reduce((a, b) => a + b.roi, 0) / result.recommendations.length)}
+            ${result.recommendations.length > 0 
+              ? Math.round(result.recommendations.reduce((a, b) => a + b.roi, 0) / result.recommendations.length)
+              : 0}
           </p>
         </motion.div>
         <motion.div
