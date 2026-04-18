@@ -1,5 +1,4 @@
 import { useState } from "react"
-import { HeroSection } from "@/components/ui/hero-section-shadcnui"
 import { WebsiteEvaluationTool } from "@/components/website-evaluation-tool"
 import { Button } from "@/components/ui/button"
 import { ArrowRight } from "lucide-react"

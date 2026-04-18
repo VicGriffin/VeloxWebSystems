@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion'
 import {
-  Download, Share2, TrendingUp, AlertCircle, CheckCircle2, Zap,
-  BarChart3, Target, Shield, Users, FileText, Search, Clock, Eye
+  Download, Share2, Zap, Target, Shield, Users, Search
 } from 'lucide-react'
 import type { WebsiteAnalysisResult } from '@/lib/api-client'
 

@@ -20,20 +20,7 @@ export function RecommendationCard({ recommendation, index }: RecommendationCard
 
   const colors = urgencyColors[recommendation.urgency]
 
-  const effortLabels = {
-    0: '< 5 hrs',
-    25: '5-10 hrs',
-    50: '10-20 hrs',
-    75: '20-40 hrs',
-    100: '40+ hrs',
-  }
 
-  const getEffortLabel = (effort: number): string => {
-    if (effort < 25) return '< 5 hrs'
-    if (effort < 50) return '5-10 hrs'
-    if (effort < 75) return '10-20 hrs'
-    return '20+ hrs'
-  }
 
   return (
     <motion.div

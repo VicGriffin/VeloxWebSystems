@@ -1,5 +1,3 @@
-'use client'
-
 import { motion } from 'framer-motion'
 import { Zap, Menu, X } from 'lucide-react'
 import { useState } from 'react'
@@ -74,12 +72,14 @@ export function NavigationHeader({ onHomeClick, currentPage = 'home' }: Navigati
         {/* Mobile Menu Button */}
         <button
           onClick={() => setIsMenuOpen(!isMenuOpen)}
+          aria-label={isMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+          aria-expanded={isMenuOpen}
           className="md:hidden p-2 hover:bg-[var(--color-bg-tertiary)] rounded-lg transition-colors"
         >
           {isMenuOpen ? (
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5" aria-hidden="true" />
           ) : (
-            <Menu className="w-5 h-5" />
+            <Menu className="w-5 h-5" aria-hidden="true" />
           )}
         </button>
       </nav>
