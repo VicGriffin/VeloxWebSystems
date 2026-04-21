@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, type Variants } from 'framer-motion'
 import {
   Zap, Globe, Lock, Unlock, Loader2, Target, MessageSquare, ArrowLeft
@@ -23,6 +23,7 @@ export function WebsiteEvaluationTool() {
   const [email, setEmail] = useState('')
   const [stage, setStage] = useState<AnalysisStage>('idle')
   const [progress, setProgress] = useState(0)
+  const shouldResetProgress = useRef(false)
   const [result, setResult] = useState<WebsiteAnalysisResult | null>(null)
   const [showEmailCapture, setShowEmailCapture] = useState(false)
   const [isPremium, setIsPremium] = useState(false)
@@ -39,18 +40,22 @@ export function WebsiteEvaluationTool() {
 
   // Progress simulation
   useEffect(() => {
+    const stages: AnalysisStage[] = ['validating', 'crawling', 'analyzing', 'calculating']
+    
     if (stage === 'idle' || stage === 'complete') {
-      setProgress(0)
+      if (shouldResetProgress.current) {
+        setProgress(0)
+        shouldResetProgress.current = false
+      }
       return
     }
 
-    const stages: AnalysisStage[] = ['validating', 'crawling', 'analyzing', 'calculating']
+    shouldResetProgress.current = true
     const stageIndex = stages.indexOf(stage)
 
     const interval = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 95) {
-          clearInterval(interval)
           return 95
         }
         const speed = stageIndex * 12 + 12
@@ -58,7 +63,9 @@ export function WebsiteEvaluationTool() {
       })
     }, 150)
 
-    return () => clearInterval(interval)
+    return () => {
+      clearInterval(interval)
+    }
   }, [stage])
 
   const startAnalysis = async () => {
@@ -160,27 +167,6 @@ export function WebsiteEvaluationTool() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[var(--color-bg-primary)] to-[var(--color-bg-secondary)] text-white">
-      {/* Header */}
-      <header className="border-b border-[var(--color-border)] bg-gradient-to-b from-[var(--color-bg-primary)] to-[var(--color-bg-secondary)] backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-accent)] rounded-lg flex items-center justify-center">
-              <Zap className="w-6 h-6 text-white" />
-            </div>
-            <span className="text-xl font-bold">Velox Audit</span>
-          </div>
-          {result && (
-            <button
-              onClick={reset}
-              className="px-4 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-all flex items-center gap-2"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              New Audit
-            </button>
-          )}
-        </div>
-      </header>
-
       <main className="max-w-7xl mx-auto px-4 py-12">
         <motion.div
           variants={containerVariants}
@@ -287,6 +273,19 @@ export function WebsiteEvaluationTool() {
           {/* Results Dashboard */}
           {result && (
             <motion.div variants={itemVariants} className="space-y-8">
+              {/* New Audit Button */}
+              <div className="flex justify-end">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={reset}
+                  className="px-4 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-all flex items-center gap-2"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  New Audit
+                </motion.button>
+              </div>
+
               {/* Main Dashboard */}
               <ResultsDashboard result={result} onExport={handleExport} onShare={handleShare} />
 

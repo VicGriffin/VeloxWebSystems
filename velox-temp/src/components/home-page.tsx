@@ -278,7 +278,8 @@ export function HomePage({ onStartAudit }: HomePageProps) {
               <div className="bg-[var(--color-bg-secondary)] border-2 border-[var(--color-border)] rounded-2xl p-8">
                 <div className="space-y-6">
                   {['Technical', 'SEO', 'UX', 'Conversion'].map((category, i) => {
-                    const score = 50 + Math.floor(Math.random() * 50)
+                    const scores = [72, 85, 78, 65]
+                    const score = scores[i]
                     return (
                       <motion.div
                         key={category}
