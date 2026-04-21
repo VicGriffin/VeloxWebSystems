@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, type Variants } from 'framer-motion'
 import {
   Zap, Globe, Lock, Unlock, Loader2, Target, MessageSquare, ArrowLeft
@@ -23,6 +23,7 @@ export function WebsiteEvaluationTool() {
   const [email, setEmail] = useState('')
   const [stage, setStage] = useState<AnalysisStage>('idle')
   const [progress, setProgress] = useState(0)
+  const shouldResetProgress = useRef(false)
   const [result, setResult] = useState<WebsiteAnalysisResult | null>(null)
   const [showEmailCapture, setShowEmailCapture] = useState(false)
   const [isPremium, setIsPremium] = useState(false)
@@ -39,18 +40,22 @@ export function WebsiteEvaluationTool() {
 
   // Progress simulation
   useEffect(() => {
+    const stages: AnalysisStage[] = ['validating', 'crawling', 'analyzing', 'calculating']
+    
     if (stage === 'idle' || stage === 'complete') {
-      setProgress(0)
+      if (shouldResetProgress.current) {
+        setProgress(0)
+        shouldResetProgress.current = false
+      }
       return
     }
 
-    const stages: AnalysisStage[] = ['validating', 'crawling', 'analyzing', 'calculating']
+    shouldResetProgress.current = true
     const stageIndex = stages.indexOf(stage)
 
     const interval = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 95) {
-          clearInterval(interval)
           return 95
         }
         const speed = stageIndex * 12 + 12
@@ -58,7 +63,9 @@ export function WebsiteEvaluationTool() {
       })
     }, 150)
 
-    return () => clearInterval(interval)
+    return () => {
+      clearInterval(interval)
+    }
   }, [stage])
 
   const startAnalysis = async () => {
