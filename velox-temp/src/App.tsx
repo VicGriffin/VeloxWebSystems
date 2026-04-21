@@ -9,7 +9,11 @@ type Page = 'home' | 'audit'
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home')
 
-  const scrollToAudit = () => {
+  const handleHomeClick = () => {
+    setCurrentPage('home')
+  }
+
+  const handleAuditClick = () => {
     setCurrentPage('audit')
   }
 
@@ -18,11 +22,12 @@ function App() {
       <div className="min-h-screen bg-gradient-to-b from-[var(--color-bg-primary)] to-[var(--color-bg-secondary)]">
         <NavigationHeader
           currentPage={currentPage === 'home' ? 'home' : 'audit'}
-          onHomeClick={() => setCurrentPage('home')}
+          onHomeClick={handleHomeClick}
+          onAuditClick={handleAuditClick}
         />
 
         {currentPage === 'home' ? (
-          <HomePage onStartAudit={scrollToAudit} />
+          <HomePage onStartAudit={handleAuditClick} />
         ) : (
           <WebsiteEvaluationTool />
         )}

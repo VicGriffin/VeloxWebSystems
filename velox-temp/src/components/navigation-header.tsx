@@ -4,16 +4,16 @@ import { useState } from 'react'
 
 interface NavigationHeaderProps {
   onHomeClick?: () => void
-  currentPage?: 'home' | 'audit' | 'results'
+  onAuditClick?: () => void
+  currentPage?: 'home' | 'audit'
 }
 
-export function NavigationHeader({ onHomeClick, currentPage = 'home' }: NavigationHeaderProps) {
+export function NavigationHeader({ onHomeClick, onAuditClick, currentPage = 'home' }: NavigationHeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   const navItems = [
-    { label: 'Home', id: 'home' },
-    { label: 'Audit Tool', id: 'audit' },
-    { label: 'Features', id: 'features' },
+    { label: 'Home', id: 'home', onClick: onHomeClick },
+    { label: 'Audit Tool', id: 'audit', onClick: onAuditClick },
   ]
 
   return (
@@ -41,17 +41,17 @@ export function NavigationHeader({ onHomeClick, currentPage = 'home' }: Navigati
           className="hidden md:flex items-center gap-1"
         >
           {navItems.map((item) => (
-            <a
+            <button
               key={item.id}
-              href={`#${item.id}`}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              onClick={item.onClick}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer ${
                 currentPage === item.id
                   ? 'bg-[var(--color-primary)] text-white'
                   : 'text-[var(--color-text-secondary)] hover:text-white hover:bg-[var(--color-bg-tertiary)]'
               }`}
             >
               {item.label}
-            </a>
+            </button>
           ))}
         </motion.div>
 
@@ -61,12 +61,12 @@ export function NavigationHeader({ onHomeClick, currentPage = 'home' }: Navigati
           animate={{ opacity: 1, x: 0 }}
           className="hidden md:block"
         >
-          <a
-            href="#audit"
-            className="px-6 py-2 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-accent)] text-white rounded-lg font-semibold text-sm hover:shadow-lg hover:shadow-[var(--color-accent)]/50 transition-all transform hover:scale-105"
+          <button
+            onClick={onAuditClick}
+            className="px-6 py-2 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-accent)] text-white rounded-lg font-semibold text-sm hover:shadow-lg hover:shadow-[var(--color-accent)]/50 transition-all transform hover:scale-105 cursor-pointer"
           >
             Start Audit
-          </a>
+          </button>
         </motion.div>
 
         {/* Mobile Menu Button */}
@@ -94,22 +94,26 @@ export function NavigationHeader({ onHomeClick, currentPage = 'home' }: Navigati
         >
           <div className="px-4 py-4 space-y-2">
             {navItems.map((item) => (
-              <a
+              <button
                 key={item.id}
-                href={`#${item.id}`}
-                onClick={() => setIsMenuOpen(false)}
-                className="block px-4 py-2 rounded-lg text-sm font-medium text-[var(--color-text-secondary)] hover:text-white hover:bg-[var(--color-bg-tertiary)] transition-all"
+                onClick={() => {
+                  item.onClick?.()
+                  setIsMenuOpen(false)
+                }}
+                className="block w-full px-4 py-2 rounded-lg text-sm font-medium text-[var(--color-text-secondary)] hover:text-white hover:bg-[var(--color-bg-tertiary)] transition-all text-left cursor-pointer"
               >
                 {item.label}
-              </a>
+              </button>
             ))}
-            <a
-              href="#audit"
-              onClick={() => setIsMenuOpen(false)}
-              className="block w-full px-4 py-2 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-accent)] text-white rounded-lg font-semibold text-sm text-center hover:shadow-lg transition-all"
+            <button
+              onClick={() => {
+                onAuditClick?.()
+                setIsMenuOpen(false)
+              }}
+              className="block w-full px-4 py-2 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-accent)] text-white rounded-lg font-semibold text-sm text-center hover:shadow-lg transition-all cursor-pointer"
             >
               Start Audit
-            </a>
+            </button>
           </div>
         </motion.div>
       )}
